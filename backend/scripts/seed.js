@@ -1,11 +1,8 @@
 const { Pool } = require('pg');
 const bcrypt = require('bcryptjs');
 
-// Database connection
-const pool = new Pool({
-  connectionString: process.env.DATABASE_URL || 'postgresql://mario_user:mario_password@localhost:5432/mario_db',
-  ssl: process.env.NODE_ENV === 'production' ? { rejectUnauthorized: false } : false
-});
+// Use the same database configuration as the main app
+const pool = require('../src/db/index.js');
 
 async function seed() {
   try {
@@ -254,7 +251,8 @@ async function seed() {
   } catch (error) {
     console.error('❌ Errore durante il seeding:', error);
   } finally {
-    await pool.end();
+    // Don't end the pool here since we're using the shared connection
+    console.log('✅ Seeding completato!');
   }
 }
 
