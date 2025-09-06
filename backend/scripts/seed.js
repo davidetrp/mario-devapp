@@ -14,11 +14,7 @@ async function seed() {
     await pool.query('DELETE FROM services');
     await pool.query('DELETE FROM users');
 
-    // Reset auto-increment sequences
-    await pool.query('ALTER SEQUENCE users_id_seq RESTART WITH 1');
-    await pool.query('ALTER SEQUENCE services_id_seq RESTART WITH 1');
-    await pool.query('ALTER SEQUENCE reviews_id_seq RESTART WITH 1');
-    await pool.query('ALTER SEQUENCE orders_id_seq RESTART WITH 1');
+    // Sequences will auto-increment from their current position
 
     // Hash password for all users
     const hashedPassword = await bcrypt.hash('password123', 10);
