@@ -31,9 +31,10 @@ async function seed() {
       { email: 'elena.ceramica@artigiani.it', username: 'elena_ceramica', name: 'Elena Ceramista' }
     ];
 
+    const artisanIds = [];
     for (const artisan of artisans) {
-      await pool.query(
-        'INSERT INTO users (email, username, password_hash, avatar) VALUES ($1, $2, $3, $4)',
+      const result = await pool.query(
+        'INSERT INTO users (email, username, password_hash, avatar) VALUES ($1, $2, $3, $4) RETURNING id',
         [
           artisan.email,
           artisan.username,
@@ -41,6 +42,7 @@ async function seed() {
           `https://api.dicebear.com/7.x/avataaars/svg?seed=${artisan.username}`
         ]
       );
+      artisanIds.push(result.rows[0].id);
     }
 
     console.log('✅ Artigiani creati con successo');
@@ -192,21 +194,23 @@ async function seed() {
       }
     ];
 
+    const serviceIds = [];
     for (let i = 0; i < services.length; i++) {
       const service = services[i];
-      await pool.query(
-        'INSERT INTO services (title, description, price, category, seller_id, image, rating, reviews_count) VALUES ($1, $2, $3, $4, $5, $6, $7, $8)',
+      const svcResult = await pool.query(
+        'INSERT INTO services (title, description, price, category, seller_id, image, rating, reviews_count) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id',
         [
           service.title,
           service.description,
           service.price,
           service.category,
-          service.seller_id,
+          artisanIds[service.seller_id - 1],
           service.image,
-          (Math.random() * 2 + 3).toFixed(1), // Rating between 3.0-5.0
-          Math.floor(Math.random() * 50) + 5  // Reviews between 5-55
+          (Math.random() * 2 + 3).toFixed(1),
+          Math.floor(Math.random() * 50) + 5
         ]
       );
+      serviceIds.push(svcResult.rows[0].id);
     }
 
     console.log('✅ Servizi artigianali creati con successo');
@@ -227,13 +231,13 @@ async function seed() {
     for (let i = 1; i <= 8; i++) {
       const numReviews = Math.floor(Math.random() * 3) + 1;
       for (let j = 0; j < numReviews; j++) {
-        const randomUser = Math.floor(Math.random() * 8) + 1;
-        const randomService = Math.floor(Math.random() * services.length) + 1;
+        const randomUserId = artisanIds[Math.floor(Math.random() * artisanIds.length)];
+        const randomServiceId = serviceIds[Math.floor(Math.random() * serviceIds.length)];
         const randomReview = reviewTexts[Math.floor(Math.random() * reviewTexts.length)];
         
         await pool.query(
           'INSERT INTO reviews (user_id, service_id, rating, comment) VALUES ($1, $2, $3, $4)',
-          [randomUser, randomService, Math.floor(Math.random() * 2) + 4, randomReview]
+          [randomUserId, randomServiceId, Math.floor(Math.random() * 2) + 4, randomReview]
         );
       }
     }
