@@ -40,6 +40,12 @@ export const RegisterForm = ({ onSwitchToLogin }: RegisterFormProps) => {
           title: "Welcome to Mario!",
           description: "Your account has been created successfully.",
         });
+      } else {
+        toast({
+          title: "Sign up failed",
+          description: "Server unavailable or email already in use.",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       toast({

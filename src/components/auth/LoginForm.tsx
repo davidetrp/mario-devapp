@@ -28,6 +28,12 @@ export const LoginForm = ({ onSwitchToRegister }: LoginFormProps) => {
           title: "Welcome back!",
           description: "You've successfully signed in.",
         });
+      } else {
+        toast({
+          title: "Sign in failed",
+          description: "Invalid credentials or server unavailable.",
+          variant: "destructive",
+        });
       }
     } catch (error) {
       toast({

@@ -2,14 +2,16 @@ import { useState, useEffect } from 'react';
 import { Service, SearchFilters } from '@/types/service';
 import { apiService } from '@/services/api';
 
-export const useServices = (searchQuery: string = '', filters: SearchFilters = {}) => {
+export const useServices = (searchQuery: string = '', filters: SearchFilters = {}, enabled: boolean = true) => {
   const [services, setServices] = useState<Service[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchServices();
-  }, [searchQuery, filters]);
+    if (enabled) {
+      fetchServices();
+    }
+  }, [searchQuery, filters, enabled]);
 
   const fetchServices = async () => {
     setIsLoading(true);

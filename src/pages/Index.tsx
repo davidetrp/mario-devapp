@@ -19,7 +19,7 @@ const Index = () => {
   const [currentPage, setCurrentPage] = useState('home');
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<SearchFilters>({});
-  const { services, isLoading: servicesLoading, error, refetch } = useServices(searchQuery, filters);
+  const { services, isLoading: servicesLoading, error, refetch } = useServices(searchQuery, filters, isAuthenticated);
 
   // Show loading spinner while checking auth
   if (authLoading) {
