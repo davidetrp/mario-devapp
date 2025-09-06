@@ -68,16 +68,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } catch (error) {
       console.error('Login error:', error);
-      // Fallback to localStorage for development/demo
-      const user: User = {
-        id: Date.now().toString(),
-        email,
-        username: email.split('@')[0],
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email}`,
-      };
-      localStorage.setItem('mario_user', JSON.stringify(user));
-      setAuthState({ user, isAuthenticated: true });
-      return true;
+      return false;
     }
   };
 
@@ -97,16 +88,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } catch (error) {
       console.error('Registration error:', error);
-      // Fallback to localStorage for development/demo
-      const user: User = {
-        id: Date.now().toString(),
-        email,
-        username,
-        avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${username}`,
-      };
-      localStorage.setItem('mario_user', JSON.stringify(user));
-      setAuthState({ user, isAuthenticated: true });
-      return true;
+      return false;
     }
   };
 

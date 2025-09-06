@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { Service, SearchFilters } from '@/types/service';
 import { apiService } from '@/services/api';
-import { mockServices } from '@/data/mockServices';
 
 export const useServices = (searchQuery: string = '', filters: SearchFilters = {}) => {
   const [services, setServices] = useState<Service[]>([]);
@@ -17,7 +16,7 @@ export const useServices = (searchQuery: string = '', filters: SearchFilters = {
     setError(null);
 
     try {
-      // Try to fetch from API first
+      // Fetch from API - no fallback to mock data
       const response = await apiService.getServices(searchQuery, filters);
       
       if (response.success && response.data) {
@@ -26,47 +25,9 @@ export const useServices = (searchQuery: string = '', filters: SearchFilters = {
         throw new Error(response.error || 'Failed to fetch services');
       }
     } catch (error) {
-      console.error('API fetch failed, using mock data:', error);
-      
-      // Fallback to mock data with client-side filtering
-      let filteredServices = [...mockServices];
-
-      // Apply search query
-      if (searchQuery.trim()) {
-        filteredServices = filteredServices.filter(service =>
-          service.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          service.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          service.category.toLowerCase().includes(searchQuery.toLowerCase())
-        );
-      }
-
-      // Apply filters
-      if (filters.category) {
-        filteredServices = filteredServices.filter(service =>
-          service.category.toLowerCase() === filters.category?.toLowerCase()
-        );
-      }
-
-      if (filters.minPrice !== undefined) {
-        filteredServices = filteredServices.filter(service =>
-          service.price >= filters.minPrice!
-        );
-      }
-
-      if (filters.maxPrice !== undefined) {
-        filteredServices = filteredServices.filter(service =>
-          service.price <= filters.maxPrice!
-        );
-      }
-
-      if (filters.rating !== undefined) {
-        filteredServices = filteredServices.filter(service =>
-          service.rating >= filters.rating!
-        );
-      }
-
-      setServices(filteredServices);
-      setError('Using offline data - connect to API for real-time results');
+      console.error('Failed to fetch services from API:', error);
+      setError('Unable to connect to the database. Please ensure your backend is running.');
+      setServices([]); // No fallback data
     } finally {
       setIsLoading(false);
     }

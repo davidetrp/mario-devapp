@@ -8,6 +8,7 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { SearchBar } from '@/components/home/SearchBar';
 import { ServiceGrid } from '@/components/home/ServiceGrid';
 import { SettingsPanel } from '@/components/settings/SettingsPanel';
+import { DatabaseConnectionError } from '@/components/errors/DatabaseConnectionError';
 import { useServices } from '@/hooks/useServices';
 import { SearchFilters } from '@/types/service';
 
@@ -18,7 +19,7 @@ const Index = () => {
   const [currentPage, setCurrentPage] = useState('home');
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<SearchFilters>({});
-  const { services, isLoading: servicesLoading, error } = useServices(searchQuery, filters);
+  const { services, isLoading: servicesLoading, error, refetch } = useServices(searchQuery, filters);
 
   // Show loading spinner while checking auth
   if (authLoading) {
@@ -43,12 +44,18 @@ const Index = () => {
     setSidebarOpen(false);
   };
 
+  // Show database connection error if no services and error exists
   if (!isAuthenticated) {
     return authMode === 'login' ? (
       <LoginForm onSwitchToRegister={() => setAuthMode('register')} />
     ) : (
       <RegisterForm onSwitchToLogin={() => setAuthMode('login')} />
     );
+  }
+
+  // Show database connection error if we can't fetch services
+  if (error && services.length === 0 && !servicesLoading) {
+    return <DatabaseConnectionError onRetry={refetch} />;
   }
 
   const renderCurrentPage = () => {
