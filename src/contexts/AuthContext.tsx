@@ -31,8 +31,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const checkAuthStatus = async () => {
-    const token = localStorage.getItem('mario_token');
+    const rawToken = localStorage.getItem('mario_token');
+    const token = rawToken && rawToken !== 'undefined' && rawToken !== 'null' ? rawToken : null;
     if (!token) {
+      localStorage.removeItem('mario_token');
       setIsLoading(false);
       return;
     }

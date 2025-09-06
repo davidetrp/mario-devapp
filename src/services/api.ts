@@ -10,7 +10,9 @@ interface ApiResponse<T> {
 
 class ApiService {
   private getAuthToken(): string | null {
-    return localStorage.getItem('mario_token');
+    const token = localStorage.getItem('mario_token');
+    if (!token || token === 'undefined' || token === 'null') return null;
+    return token;
   }
 
   private async request<T>(
@@ -31,13 +33,16 @@ class ApiService {
 
     try {
       const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
-      const data = await response.json();
+      const raw = await response.json();
 
       if (!response.ok) {
-        return { success: false, error: data.message || 'An error occurred' };
+        const message = raw?.error || raw?.message || 'An error occurred';
+        return { success: false, error: message };
       }
 
-      return { success: true, data };
+      // Normalize backend shape: { success, data } -> return just data
+      const normalizedData = (raw && typeof raw === 'object' && 'data' in raw) ? raw.data : raw;
+      return { success: true, data: normalizedData };
     } catch (error) {
       console.error('API request failed:', error);
       return { success: false, error: 'Network error' };
