@@ -8,33 +8,34 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { SearchBar } from '@/components/home/SearchBar';
 import { ServiceGrid } from '@/components/home/ServiceGrid';
 import { SettingsPanel } from '@/components/settings/SettingsPanel';
-import { mockServices } from '@/data/mockServices';
-import { Service } from '@/types/service';
+import { useServices } from '@/hooks/useServices';
+import { SearchFilters } from '@/types/service';
 
 const Index = () => {
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, isLoading: authLoading } = useAuth();
   const [authMode, setAuthMode] = useState<'login' | 'register'>('login');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [currentPage, setCurrentPage] = useState('home');
-  const [services, setServices] = useState<Service[]>(mockServices);
   const [searchQuery, setSearchQuery] = useState('');
+  const [filters, setFilters] = useState<SearchFilters>({});
+  const { services, isLoading: servicesLoading, error } = useServices(searchQuery, filters);
 
-  useEffect(() => {
-    // Filter services based on search query
-    if (searchQuery.trim()) {
-      const filtered = mockServices.filter(service =>
-        service.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        service.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        service.category.toLowerCase().includes(searchQuery.toLowerCase())
-      );
-      setServices(filtered);
-    } else {
-      setServices(mockServices);
-    }
-  }, [searchQuery]);
+  // Show loading spinner while checking auth
+  if (authLoading) {
+    return (
+      <div className="min-h-screen bg-gradient-dark flex items-center justify-center">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   const handleSearch = (query: string) => {
     setSearchQuery(query);
+  };
+
+  const handleFilterToggle = () => {
+    // TODO: Implement filter panel
+    console.log('Filter toggle clicked');
   };
 
   const handleNavigate = (page: string) => {
@@ -72,8 +73,13 @@ const Index = () => {
                 Discover talented freelancers ready to help bring your ideas to life
               </p>
             </div>
-            <SearchBar onSearch={handleSearch} onFilterToggle={() => {}} />
-            <ServiceGrid services={services} />
+            <SearchBar onSearch={handleSearch} onFilterToggle={handleFilterToggle} />
+            {error && (
+              <div className="text-center p-4 bg-muted/20 rounded-lg border border-border">
+                <p className="text-sm text-muted-foreground">{error}</p>
+              </div>
+            )}
+            <ServiceGrid services={services} isLoading={servicesLoading} />
           </div>
         );
     }
