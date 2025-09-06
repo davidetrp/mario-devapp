@@ -38,57 +38,30 @@ cat > backend/package.json << 'EOF'
   "name": "mario-backend",
   "version": "1.0.0",
   "description": "Backend for Mario marketplace app",
-  "main": "dist/server.js",
+  "main": "src/server.js",
+  "type": "commonjs",
   "scripts": {
-    "dev": "nodemon src/server.ts",
-    "build": "tsc",
-    "start": "node dist/server.js",
-    "setup": "npm install && npm run build",
+    "dev": "nodemon src/server.js",
+    "start": "node src/server.js",
     "seed": "node scripts/seed.js"
   },
   "dependencies": {
-    "express": "^4.18.2",
-    "cors": "^2.8.5",
-    "helmet": "^7.0.0",
     "bcryptjs": "^2.4.3",
-    "jsonwebtoken": "^9.0.2",
-    "pg": "^8.11.3",
+    "cors": "^2.8.5",
     "dotenv": "^16.3.1",
-    "multer": "^1.4.5-lts.1"
+    "express": "^4.18.2",
+    "helmet": "^7.0.0",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "pg": "^8.11.3"
   },
   "devDependencies": {
-    "@types/node": "^20.5.0",
-    "@types/express": "^4.17.17",
-    "@types/bcryptjs": "^2.4.2",
-    "@types/jsonwebtoken": "^9.0.2",
-    "@types/pg": "^8.10.2",
-    "@types/multer": "^1.4.7",
-    "typescript": "^5.1.6",
-    "nodemon": "^3.0.1",
-    "ts-node": "^10.9.1"
+    "nodemon": "^3.0.1"
   }
 }
 EOF
 
-# Create TypeScript config
-cat > backend/tsconfig.json << 'EOF'
-{
-  "compilerOptions": {
-    "target": "ES2020",
-    "lib": ["ES2020"],
-    "module": "commonjs",
-    "rootDir": "./src",
-    "outDir": "./dist",
-    "strict": true,
-    "esModuleInterop": true,
-    "skipLibCheck": true,
-    "forceConsistentCasingInFileNames": true,
-    "resolveJsonModule": true
-  },
-  "include": ["src/**/*"],
-  "exclude": ["node_modules", "dist"]
-}
-EOF
+# Skipping TypeScript config (using JavaScript backend)
 
 # Create environment file
 cat > backend/.env << 'EOF'
