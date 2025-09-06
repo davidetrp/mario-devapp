@@ -24,8 +24,8 @@ export const RegisterForm = ({ onSwitchToLogin }: RegisterFormProps) => {
     
     if (password !== confirmPassword) {
       toast({
-        title: "Error",
-        description: "Passwords don't match.",
+        title: "Errore",
+        description: "Le password non corrispondono.",
         variant: "destructive",
       });
       return;
@@ -37,20 +37,20 @@ export const RegisterForm = ({ onSwitchToLogin }: RegisterFormProps) => {
       const success = await register(email, password, username);
       if (success) {
         toast({
-          title: "Welcome to Mario!",
-          description: "Your account has been created successfully.",
+          title: "Benvenuto in Mario!",
+          description: "Il tuo account è stato creato con successo.",
         });
       } else {
         toast({
-          title: "Sign up failed",
-          description: "Server unavailable or email already in use.",
+          title: "Registrazione fallita",
+          description: "Server non disponibile o email già in uso.",
           variant: "destructive",
         });
       }
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
+        title: "Errore",
+        description: "Qualcosa è andato storto. Riprova.",
         variant: "destructive",
       });
     } finally {
@@ -66,18 +66,18 @@ export const RegisterForm = ({ onSwitchToLogin }: RegisterFormProps) => {
             <span className="text-primary-foreground font-bold text-xl">M</span>
           </div>
           <div>
-            <CardTitle className="text-2xl">Join Mario</CardTitle>
-            <CardDescription>Create your account to get started</CardDescription>
+            <CardTitle className="text-2xl">Unisciti a Mario</CardTitle>
+            <CardDescription>Crea il tuo account per iniziare</CardDescription>
           </div>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="username">Username</Label>
+              <Label htmlFor="username">Nome utente</Label>
               <Input
                 id="username"
                 type="text"
-                placeholder="yourusername"
+                placeholder="iltuonome"
                 value={username}
                 onChange={(e) => setUsername(e.target.value)}
                 required
@@ -89,7 +89,7 @@ export const RegisterForm = ({ onSwitchToLogin }: RegisterFormProps) => {
               <Input
                 id="email"
                 type="email"
-                placeholder="you@example.com"
+                placeholder="artisan@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -109,7 +109,7 @@ export const RegisterForm = ({ onSwitchToLogin }: RegisterFormProps) => {
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm Password</Label>
+              <Label htmlFor="confirmPassword">Conferma Password</Label>
               <Input
                 id="confirmPassword"
                 type="password"
@@ -125,17 +125,17 @@ export const RegisterForm = ({ onSwitchToLogin }: RegisterFormProps) => {
               className="w-full bg-gradient-primary hover:shadow-glow transition-all duration-300"
               disabled={isLoading}
             >
-              {isLoading ? 'Creating account...' : 'Create Account'}
+              {isLoading ? 'Creazione account...' : 'Crea Account'}
             </Button>
           </form>
           <div className="mt-6 text-center">
             <p className="text-sm text-muted-foreground">
-              Already have an account?{' '}
+              Hai già un account?{' '}
               <button
                 onClick={onSwitchToLogin}
                 className="text-primary hover:text-primary-glow transition-colors underline"
               >
-                Sign in
+                Accedi
               </button>
             </p>
           </div>

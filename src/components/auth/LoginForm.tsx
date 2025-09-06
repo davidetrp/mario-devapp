@@ -25,13 +25,13 @@ export const LoginForm = ({ onSwitchToRegister }: LoginFormProps) => {
       const success = await login(email, password);
       if (success) {
         toast({
-          title: "Welcome back!",
-          description: "You've successfully signed in.",
+          title: "Bentornato!",
+          description: "Accesso effettuato con successo.",
         });
       } else {
         toast({
-          title: "Sign in failed",
-          description: "Invalid credentials or server unavailable.",
+          title: "Accesso fallito",
+          description: "Credenziali non valide o server non disponibile.",
           variant: "destructive",
         });
       }
@@ -54,8 +54,8 @@ export const LoginForm = ({ onSwitchToRegister }: LoginFormProps) => {
             <span className="text-primary-foreground font-bold text-xl">M</span>
           </div>
           <div>
-            <CardTitle className="text-2xl">Welcome back</CardTitle>
-            <CardDescription>Sign in to your Mario account</CardDescription>
+            <CardTitle className="text-2xl">Bentornato</CardTitle>
+            <CardDescription>Accedi al tuo account Mario</CardDescription>
           </div>
         </CardHeader>
         <CardContent>
@@ -65,7 +65,7 @@ export const LoginForm = ({ onSwitchToRegister }: LoginFormProps) => {
               <Input
                 id="email"
                 type="email"
-                placeholder="you@example.com"
+                placeholder="artisan@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 required
@@ -89,17 +89,17 @@ export const LoginForm = ({ onSwitchToRegister }: LoginFormProps) => {
               className="w-full bg-gradient-primary hover:shadow-glow transition-all duration-300"
               disabled={isLoading}
             >
-              {isLoading ? 'Signing in...' : 'Sign In'}
+              {isLoading ? 'Accesso...' : 'Accedi'}
             </Button>
           </form>
           <div className="mt-6 text-center">
             <p className="text-sm text-muted-foreground">
-              Don't have an account?{' '}
+              Non hai un account?{' '}
               <button
                 onClick={onSwitchToRegister}
                 className="text-primary hover:text-primary-glow transition-colors underline"
               >
-                Sign up
+                Registrati
               </button>
             </p>
           </div>
