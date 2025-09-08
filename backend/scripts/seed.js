@@ -4,16 +4,59 @@ const bcrypt = require('bcryptjs');
 // Use the same database configuration as the main app
 const pool = require('../src/db/index.js');
 
+async function ensureSchema() {
+  await pool.query(`
+    CREATE TABLE IF NOT EXISTS users (
+      id SERIAL PRIMARY KEY,
+      email VARCHAR(255) UNIQUE NOT NULL,
+      username VARCHAR(50) UNIQUE NOT NULL,
+      password_hash TEXT NOT NULL,
+      avatar TEXT,
+      name TEXT,
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+    CREATE TABLE IF NOT EXISTS services (
+      id SERIAL PRIMARY KEY,
+      title TEXT NOT NULL,
+      description TEXT NOT NULL,
+      price NUMERIC(10,2) NOT NULL,
+      category TEXT NOT NULL,
+      seller_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      image TEXT,
+      rating NUMERIC(2,1) DEFAULT 0,
+      reviews_count INTEGER DEFAULT 0,
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+    CREATE TABLE IF NOT EXISTS reviews (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id) ON DELETE CASCADE,
+      service_id INTEGER REFERENCES services(id) ON DELETE CASCADE,
+      rating INTEGER CHECK (rating BETWEEN 1 AND 5),
+      comment TEXT,
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+    CREATE TABLE IF NOT EXISTS orders (
+      id SERIAL PRIMARY KEY,
+      user_id INTEGER REFERENCES users(id) ON DELETE SET NULL,
+      service_id INTEGER REFERENCES services(id) ON DELETE SET NULL,
+      quantity INTEGER DEFAULT 1,
+      total NUMERIC(10,2) NOT NULL,
+      status TEXT DEFAULT 'pending',
+      created_at TIMESTAMP DEFAULT NOW()
+    );
+  `);
+}
+
 async function seed() {
   try {
     console.log('🌱 Inizio del seeding del database...');
 
-    // Clear existing data
+    // Ensure schema exists, then clear existing data
+    await ensureSchema();
     await pool.query('DELETE FROM orders');
     await pool.query('DELETE FROM reviews');
     await pool.query('DELETE FROM services');
     await pool.query('DELETE FROM users');
-
     // Sequences will auto-increment from their current position
 
     // Hash password for all users
