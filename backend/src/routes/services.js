@@ -86,27 +86,46 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Get single service
+// Get single service with full details
 router.get('/:id', async (req, res) => {
   try {
     const { id } = req.params;
 
-    const result = await pool.query(
-      `SELECT s.*, u.username as seller_username, u.avatar as seller_avatar 
+    // Get service with seller details
+    const serviceResult = await pool.query(
+      `SELECT s.*, u.username as seller_username, u.avatar as seller_avatar, 
+              u.name as seller_name, u.bio as seller_bio, u.location as seller_location,
+              u.phone as seller_phone, u.website as seller_website, u.years_experience
        FROM services s 
        JOIN users u ON s.seller_id = u.id 
        WHERE s.id = $1`,
       [id]
     );
 
-    if (result.rows.length === 0) {
+    if (serviceResult.rows.length === 0) {
       return res.status(404).json({
         success: false,
         error: 'Service not found'
       });
     }
 
-    const row = result.rows[0];
+    // Get service gallery
+    const galleryResult = await pool.query(
+      'SELECT image_url, caption, display_order FROM service_galleries WHERE service_id = $1 ORDER BY display_order',
+      [id]
+    );
+
+    // Get service reviews with user details
+    const reviewsResult = await pool.query(
+      `SELECT r.*, u.username, u.avatar, u.name 
+       FROM reviews r 
+       JOIN users u ON r.user_id = u.id 
+       WHERE r.service_id = $1 
+       ORDER BY r.created_at DESC`,
+      [id]
+    );
+
+    const row = serviceResult.rows[0];
     const service = {
       id: row.id.toString(),
       title: row.title,
@@ -114,13 +133,37 @@ router.get('/:id', async (req, res) => {
       price: parseFloat(row.price),
       image: row.image,
       category: row.category,
+      rating: parseFloat(row.rating),
+      reviews_count: row.reviews_count,
+      created_at: row.created_at,
+      gallery: galleryResult.rows.map(img => ({
+        url: img.image_url,
+        caption: img.caption,
+        order: img.display_order
+      })),
       seller: {
+        id: row.seller_id,
         username: row.seller_username,
+        name: row.seller_name,
         avatar: row.seller_avatar,
+        bio: row.seller_bio,
+        location: row.seller_location,
+        phone: row.seller_phone,
+        website: row.seller_website,
+        years_experience: row.years_experience,
         rating: parseFloat(row.rating)
       },
-      rating: parseFloat(row.rating),
-      reviews: row.reviews_count
+      reviews: reviewsResult.rows.map(review => ({
+        id: review.id,
+        rating: review.rating,
+        comment: review.comment,
+        created_at: review.created_at,
+        user: {
+          username: review.username,
+          name: review.name,
+          avatar: review.avatar
+        }
+      }))
     };
 
     res.json({
@@ -130,6 +173,89 @@ router.get('/:id', async (req, res) => {
 
   } catch (error) {
     console.error('Get service error:', error);
+    res.status(500).json({
+      success: false,
+      error: 'Internal server error'
+    });
+  }
+});
+
+// Get seller profile
+router.get('/seller/:username', async (req, res) => {
+  try {
+    const { username } = req.params;
+
+    // Get seller details
+    const sellerResult = await pool.query(
+      'SELECT id, username, name, avatar, bio, location, phone, website, years_experience, created_at FROM users WHERE username = $1',
+      [username]
+    );
+
+    if (sellerResult.rows.length === 0) {
+      return res.status(404).json({
+        success: false,
+        error: 'Seller not found'
+      });
+    }
+
+    const seller = sellerResult.rows[0];
+
+    // Get seller's services
+    const servicesResult = await pool.query(
+      'SELECT * FROM services WHERE seller_id = $1 ORDER BY created_at DESC',
+      [seller.id]
+    );
+
+    // Get seller's average rating from their services
+    const ratingResult = await pool.query(
+      'SELECT AVG(rating) as avg_rating, COUNT(*) as total_services FROM services WHERE seller_id = $1',
+      [seller.id]
+    );
+
+    // Get total reviews for seller's services
+    const reviewsCountResult = await pool.query(
+      `SELECT COUNT(*) as total_reviews 
+       FROM reviews r 
+       JOIN services s ON r.service_id = s.id 
+       WHERE s.seller_id = $1`,
+      [seller.id]
+    );
+
+    const sellerProfile = {
+      id: seller.id,
+      username: seller.username,
+      name: seller.name,
+      avatar: seller.avatar,
+      bio: seller.bio,
+      location: seller.location,
+      phone: seller.phone,
+      website: seller.website,
+      years_experience: seller.years_experience,
+      member_since: seller.created_at,
+      stats: {
+        avg_rating: parseFloat(ratingResult.rows[0].avg_rating || 0),
+        total_services: parseInt(ratingResult.rows[0].total_services || 0),
+        total_reviews: parseInt(reviewsCountResult.rows[0].total_reviews || 0)
+      },
+      services: servicesResult.rows.map(service => ({
+        id: service.id.toString(),
+        title: service.title,
+        description: service.description,
+        price: parseFloat(service.price),
+        image: service.image,
+        category: service.category,
+        rating: parseFloat(service.rating),
+        reviews_count: service.reviews_count
+      }))
+    };
+
+    res.json({
+      success: true,
+      data: sellerProfile
+    });
+
+  } catch (error) {
+    console.error('Get seller profile error:', error);
     res.status(500).json({
       success: false,
       error: 'Internal server error'

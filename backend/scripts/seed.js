@@ -13,6 +13,11 @@ async function ensureSchema() {
       password_hash TEXT NOT NULL,
       avatar TEXT,
       name TEXT,
+      bio TEXT,
+      location TEXT,
+      phone TEXT,
+      website TEXT,
+      years_experience INTEGER DEFAULT 0,
       created_at TIMESTAMP DEFAULT NOW()
     );
     CREATE TABLE IF NOT EXISTS services (
@@ -25,6 +30,15 @@ async function ensureSchema() {
       image TEXT,
       rating NUMERIC(2,1) DEFAULT 0,
       reviews_count INTEGER DEFAULT 0,
+      created_at TIMESTAMP DEFAULT NOW(),
+      updated_at TIMESTAMP DEFAULT NOW()
+    );
+    CREATE TABLE IF NOT EXISTS service_galleries (
+      id SERIAL PRIMARY KEY,
+      service_id INTEGER REFERENCES services(id) ON DELETE CASCADE,
+      image_url TEXT NOT NULL,
+      caption TEXT,
+      display_order INTEGER DEFAULT 0,
       created_at TIMESTAMP DEFAULT NOW()
     );
     CREATE TABLE IF NOT EXISTS reviews (
@@ -64,25 +78,103 @@ async function seed() {
 
     // Insert artisan users
     const artisans = [
-      { email: 'marco.orefice@artigiani.it', username: 'marco_orefice', name: 'Marco Benedetti' },
-      { email: 'sofia.sarta@artigiani.it', username: 'sofia_sarta', name: 'Sofia Rossi' },
-      { email: 'luca.mobile@artigiani.it', username: 'luca_mobile', name: 'Luca Falegname' },
-      { email: 'anna.casa@artigiani.it', username: 'anna_casa', name: 'Anna Ferro' },
-      { email: 'pietro.tempo@artigiani.it', username: 'pietro_tempo', name: 'Pietro Cronos' },
-      { email: 'giulia.cibo@artigiani.it', username: 'giulia_cibo', name: 'Giulia Sapori' },
-      { email: 'davide.attrezzi@artigiani.it', username: 'davide_attrezzi', name: 'Davide Fabbro' },
-      { email: 'elena.ceramica@artigiani.it', username: 'elena_ceramica', name: 'Elena Ceramista' }
+      { 
+        email: 'marco.orefice@artigiani.it', 
+        username: 'marco_orefice', 
+        name: 'Marco Benedetti',
+        bio: 'Maestro orafo con oltre 20 anni di esperienza nella creazione di gioielli unici. Specializzato in anelli di fidanzamento e collane personalizzate.',
+        location: 'Firenze, Toscana',
+        phone: '+39 055 1234567',
+        website: 'www.marcobenedetti-gioielli.it',
+        years_experience: 20
+      },
+      { 
+        email: 'sofia.sarta@artigiani.it', 
+        username: 'sofia_sarta', 
+        name: 'Sofia Rossi',
+        bio: 'Stilista e sarta specializzata in alta moda italiana. Realizzo abiti su misura per occasioni speciali seguendo la tradizione sartoriale italiana.',
+        location: 'Milano, Lombardia',
+        phone: '+39 02 9876543',
+        website: 'www.sofiarossi-moda.it',
+        years_experience: 15
+      },
+      { 
+        email: 'luca.mobile@artigiani.it', 
+        username: 'luca_mobile', 
+        name: 'Luca Falegname',
+        bio: 'Ebanista e falegname di terza generazione. Creo mobili su misura in legno massello utilizzando tecniche tradizionali tramandate di padre in figlio.',
+        location: 'Udine, Friuli-Venezia Giulia',
+        phone: '+39 0432 555666',
+        website: 'www.falegnamerialuca.it',
+        years_experience: 25
+      },
+      { 
+        email: 'anna.casa@artigiani.it', 
+        username: 'anna_casa', 
+        name: 'Anna Ferro',
+        bio: 'Artigiana del ferro specializzata nella creazione di oggetti decorativi e funzionali per la casa. Lavoro il ferro battuto con tecniche antiche.',
+        location: 'Bergamo, Lombardia',
+        phone: '+39 035 777888',
+        website: 'www.annaferro-artigiana.it',
+        years_experience: 12
+      },
+      { 
+        email: 'pietro.tempo@artigiani.it', 
+        username: 'pietro_tempo', 
+        name: 'Pietro Cronos',
+        bio: 'Orologiaio esperto nel restauro e riparazione di orologi antichi e moderni. Passione per i meccanismi di precisione e la storia dell\'orologeria.',
+        location: 'Roma, Lazio',
+        phone: '+39 06 111222',
+        website: 'www.pietrochronos.it',
+        years_experience: 30
+      },
+      { 
+        email: 'giulia.cibo@artigiani.it', 
+        username: 'giulia_cibo', 
+        name: 'Giulia Sapori',
+        bio: 'Produttrice artigianale di salumi e formaggi tradizionali. Utilizzo solo ingredienti locali e ricette di famiglia tramandate da generazioni.',
+        location: 'Parma, Emilia-Romagna',
+        phone: '+39 0521 333444',
+        website: 'www.giuliasapori.it',
+        years_experience: 18
+      },
+      { 
+        email: 'davide.attrezzi@artigiani.it', 
+        username: 'davide_attrezzi', 
+        name: 'Davide Fabbro',
+        bio: 'Fabbro specializzato nella forgiatura di attrezzi da lavoro e utensili artigianali. Ogni pezzo è forgiato a mano seguendo antiche tecniche.',
+        location: 'Brescia, Lombardia',
+        phone: '+39 030 999000',
+        website: 'www.davidefabbro.it',
+        years_experience: 22
+      },
+      { 
+        email: 'elena.ceramica@artigiani.it', 
+        username: 'elena_ceramica', 
+        name: 'Elena Ceramista',
+        bio: 'Ceramista esperta nella produzione di piastrelle e oggetti decorativi in ceramica. Dipingo a mano ogni pezzo con motivi tradizionali italiani.',
+        location: 'Faenza, Emilia-Romagna',
+        phone: '+39 0546 666777',
+        website: 'www.elenaceramica.it',
+        years_experience: 16
+      }
     ];
 
     const artisanIds = [];
     for (const artisan of artisans) {
       const result = await pool.query(
-        'INSERT INTO users (email, username, password_hash, avatar) VALUES ($1, $2, $3, $4) RETURNING id',
+        'INSERT INTO users (email, username, password_hash, avatar, name, bio, location, phone, website, years_experience) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id',
         [
           artisan.email,
           artisan.username,
           hashedPassword,
-          `https://api.dicebear.com/7.x/avataaars/svg?seed=${artisan.username}`
+          `https://api.dicebear.com/7.x/avataaars/svg?seed=${artisan.username}`,
+          artisan.name,
+          artisan.bio,
+          artisan.location,
+          artisan.phone,
+          artisan.website,
+          artisan.years_experience
         ]
       );
       artisanIds.push(result.rows[0].id);
@@ -257,6 +349,110 @@ async function seed() {
     }
 
     console.log('✅ Servizi artigianali creati con successo');
+
+    // Insert service galleries
+    const galleries = [
+      // Gioielleria - Marco
+      { service_index: 0, images: [
+        'https://images.unsplash.com/photo-1605100804763-247f67b3557e?w=400',
+        'https://images.unsplash.com/photo-1544376664-80b17f09d399?w=400',
+        'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400'
+      ]},
+      { service_index: 1, images: [
+        'https://images.unsplash.com/photo-1515562141207-7a88fb7ce338?w=400',
+        'https://images.unsplash.com/photo-1611652022419-a9419f74343d?w=400',
+        'https://images.unsplash.com/photo-1596944946330-b37b7797f3ca?w=400'
+      ]},
+      // Design abbigliamento - Sofia
+      { service_index: 2, images: [
+        'https://images.unsplash.com/photo-1566479179817-c8723ee8a56e?w=400',
+        'https://images.unsplash.com/photo-1539008835657-9e8e9680c956?w=400',
+        'https://images.unsplash.com/photo-1594938392931-1d179134e295?w=400'
+      ]},
+      { service_index: 3, images: [
+        'https://images.unsplash.com/photo-1594938392931-1d179134e295?w=400',
+        'https://images.unsplash.com/photo-1564466809058-bf4114d55352?w=400',
+        'https://images.unsplash.com/photo-1578662996442-48f60103fc96?w=400'
+      ]},
+      // Ebanisteria - Luca (services 4, 5)
+      { service_index: 4, images: [
+        'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400',
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
+        'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400'
+      ]},
+      { service_index: 5, images: [
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
+        'https://images.unsplash.com/photo-1616627433291-8dd7bab45c78?w=400',
+        'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400'
+      ]},
+      // Design oggetti casa - Anna (services 6, 7)
+      { service_index: 6, images: [
+        'https://images.unsplash.com/photo-1540379008-b9f8f2c6f994?w=400',
+        'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400',
+        'https://images.unsplash.com/photo-1521100730256-28f30f6bb78b?w=400'
+      ]},
+      { service_index: 7, images: [
+        'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400',
+        'https://images.unsplash.com/photo-1513694203232-719a280e022f?w=400',
+        'https://images.unsplash.com/photo-1471919743851-c4df8b6eead?w=400'
+      ]},
+      // Orologeria - Pietro (services 8, 9)
+      { service_index: 8, images: [
+        'https://images.unsplash.com/photo-1564466809058-bf4114d55352?w=400',
+        'https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?w=400',
+        'https://images.unsplash.com/photo-1495856458515-0637185db551?w=400'
+      ]},
+      { service_index: 9, images: [
+        'https://images.unsplash.com/photo-1522312346375-d1a52e2b99b3?w=400',
+        'https://images.unsplash.com/photo-1524805444758-089113d48a6d?w=400',
+        'https://images.unsplash.com/photo-1509048191080-d2e617282156?w=400'
+      ]},
+      // Produzione alimentare - Giulia (services 10, 11)
+      { service_index: 10, images: [
+        'https://images.unsplash.com/photo-1567171515071-0c8c1d9ae1c7?w=400',
+        'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=400',
+        'https://images.unsplash.com/photo-1504674900247-0877df9cc836?w=400'
+      ]},
+      { service_index: 11, images: [
+        'https://images.unsplash.com/photo-1486297678162-eb2a19b0a32d?w=400',
+        'https://images.unsplash.com/photo-1552767059-ce182ead6c1b?w=400',
+        'https://images.unsplash.com/photo-1590736969955-71cc94901144?w=400'
+      ]},
+      // Fabbricazione attrezzi - Davide (services 12, 13)
+      { service_index: 12, images: [
+        'https://images.unsplash.com/photo-1416879595882-3373a0480b5b?w=400',
+        'https://images.unsplash.com/photo-1521100730256-28f30f6bb78b?w=400',
+        'https://images.unsplash.com/photo-1504307651254-35680f356dfd?w=400'
+      ]},
+      { service_index: 13, images: [
+        'https://images.unsplash.com/photo-1521100730256-28f30f6bb78b?w=400',
+        'https://images.unsplash.com/photo-1581833971358-2c8b550f87b3?w=400',
+        'https://images.unsplash.com/photo-1609081219090-a6d81d3085bf?w=400'
+      ]},
+      // Piastrelle - Elena (services 14, 15)
+      { service_index: 14, images: [
+        'https://images.unsplash.com/photo-1584622650111-993a426fbf0a?w=400',
+        'https://images.unsplash.com/photo-1571055107494-8d1b38da69a6?w=400',
+        'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?w=400'
+      ]},
+      { service_index: 15, images: [
+        'https://images.unsplash.com/photo-1571055107494-8d1b38da69a6?w=400',
+        'https://images.unsplash.com/photo-1615529328331-f8917597711f?w=400',
+        'https://images.unsplash.com/photo-1616486029423-aaa4789e8c9a?w=400'
+      ]}
+    ];
+
+    for (const gallery of galleries) {
+      const serviceId = serviceIds[gallery.service_index];
+      for (let i = 0; i < gallery.images.length; i++) {
+        await pool.query(
+          'INSERT INTO service_galleries (service_id, image_url, display_order) VALUES ($1, $2, $3)',
+          [serviceId, gallery.images[i], i]
+        );
+      }
+    }
+
+    console.log('✅ Gallerie servizi create con successo');
 
     // Insert sample reviews
     const reviewTexts = [

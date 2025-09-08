@@ -3,14 +3,20 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Star } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 interface ServiceCardProps {
   service: Service;
 }
 
 export const ServiceCard = ({ service }: ServiceCardProps) => {
+  const navigate = useNavigate();
+
+  const handleClick = () => {
+    navigate(`/service/${service.id}`);
+  };
   return (
-    <Card className="group cursor-pointer transition-all duration-300 hover:shadow-card hover:-translate-y-1 bg-gradient-card border-border">
+    <Card className="group cursor-pointer transition-all duration-300 hover:shadow-card hover:-translate-y-1 bg-gradient-card border-border" onClick={handleClick}>
       <div className="aspect-video relative overflow-hidden rounded-t-lg">
         <img
           src={service.image}
