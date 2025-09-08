@@ -58,6 +58,18 @@ async function ensureSchema() {
       status TEXT DEFAULT 'pending',
       created_at TIMESTAMP DEFAULT NOW()
     );
+
+    -- Ensure newly added columns exist even if tables were created before
+    ALTER TABLE users
+      ADD COLUMN IF NOT EXISTS name TEXT,
+      ADD COLUMN IF NOT EXISTS bio TEXT,
+      ADD COLUMN IF NOT EXISTS location TEXT,
+      ADD COLUMN IF NOT EXISTS phone TEXT,
+      ADD COLUMN IF NOT EXISTS website TEXT,
+      ADD COLUMN IF NOT EXISTS years_experience INTEGER DEFAULT 0;
+
+    ALTER TABLE services
+      ADD COLUMN IF NOT EXISTS updated_at TIMESTAMP DEFAULT NOW();
   `);
 }
 
