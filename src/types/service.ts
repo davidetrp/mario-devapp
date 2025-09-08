@@ -59,4 +59,8 @@ export interface SearchFilters {
   minPrice?: number;
   maxPrice?: number;
   rating?: number;
+  location?: string;
+  latitude?: number;
+  longitude?: number;
+  distance?: number;
 }

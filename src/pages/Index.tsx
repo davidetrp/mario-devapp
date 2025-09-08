@@ -7,6 +7,7 @@ import { RegisterForm } from '@/components/auth/RegisterForm';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { SearchBar } from '@/components/home/SearchBar';
 import { ServiceGrid } from '@/components/home/ServiceGrid';
+import { FilterPanel } from '@/components/home/FilterPanel';
 import { SettingsPanel } from '@/components/settings/SettingsPanel';
 import { DatabaseConnectionError } from '@/components/errors/DatabaseConnectionError';
 import { useServices } from '@/hooks/useServices';
@@ -19,6 +20,7 @@ const Index = () => {
   const [currentPage, setCurrentPage] = useState('home');
   const [searchQuery, setSearchQuery] = useState('');
   const [filters, setFilters] = useState<SearchFilters>({});
+  const [isFilterPanelOpen, setIsFilterPanelOpen] = useState(false);
   const { services, isLoading: servicesLoading, error, refetch } = useServices(searchQuery, filters, isAuthenticated);
 
   // Show loading spinner while checking auth
@@ -35,8 +37,11 @@ const Index = () => {
   };
 
   const handleFilterToggle = () => {
-    // TODO: Implement filter panel
-    console.log('Filter toggle clicked');
+    setIsFilterPanelOpen(true);
+  };
+
+  const handleFiltersChange = (newFilters: SearchFilters) => {
+    setFilters(newFilters);
   };
 
   const handleNavigate = (page: string) => {
@@ -112,6 +117,14 @@ const Index = () => {
         onToggle={() => setSidebarOpen(!sidebarOpen)}
         onNavigate={handleNavigate}
         currentPage={currentPage}
+      />
+
+      {/* Filter Panel */}
+      <FilterPanel
+        isOpen={isFilterPanelOpen}
+        onClose={() => setIsFilterPanelOpen(false)}
+        filters={filters}
+        onFiltersChange={handleFiltersChange}
       />
 
       {/* Main content */}
