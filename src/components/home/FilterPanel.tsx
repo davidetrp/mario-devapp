@@ -242,7 +242,6 @@ export const FilterPanel = ({ isOpen, onClose, filters, onFiltersChange }: Filte
                   <SelectValue placeholder="Seleziona categoria" />
                 </SelectTrigger>
                 <SelectContent className="bg-popover border-border">
-                  <SelectItem value="">Tutte le categorie</SelectItem>
                   {categories.map((category) => (
                     <SelectItem key={category} value={category}>
                       {category}
