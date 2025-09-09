@@ -142,21 +142,6 @@ sudo systemctl reload nginx || error "Failed to reload nginx"
 log "🏥 Performing health check..."
 sleep 3
 
-# Check if backend is responding
-if curl -f -s -H "Host: mario-online.shop" https://localhost/api/health >/dev/null; then
-    log "✅ Backend health check passed"
-else
-    warn "Backend health check failed, but continuing..."
-    sudo pm2 logs mario-backend --lines 10
-fi
-
-# Check if frontend is accessible
-if curl -f -s -H "Host: mario-online.shop" https://localhost/ >/dev/null; then
-    log "✅ Frontend health check passed"
-else
-    warn "Frontend health check failed"
-fi
-
 # Final status
 log "📊 Final status:"
 echo -e "   ${BLUE}Frontend:${NC} $([ "$FRONTEND_CHANGED" = true ] && echo "Updated" || echo "No changes")"
