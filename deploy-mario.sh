@@ -72,9 +72,37 @@ echo -e "${GREEN}📁 Creating application directory...${NC}"
 mkdir -p $APP_DIR
 cd $APP_DIR
 
-# Clone repository
-echo -e "${GREEN}📥 Cloning repository...${NC}"
-git clone https://github.com/$GITHUB_USERNAME/$REPO_NAME.git .
+# Clone or update repository safely
+EXPECTED_REMOTE="https://github.com/$GITHUB_USERNAME/$REPO_NAME.git"
+echo -e "${GREEN}📥 Ensuring repository at $APP_DIR...${NC}"
+if [ -d .git ]; then
+  echo -e "${YELLOW}Git repo already exists. Updating...${NC}"
+  CURRENT_REMOTE=$(git remote get-url origin 2>/dev/null || echo "")
+  if [ "$CURRENT_REMOTE" = "$EXPECTED_REMOTE" ]; then
+    git fetch --all --prune
+    if git rev-parse --verify origin/main >/dev/null 2>&1; then DEFAULT_BRANCH=main; else DEFAULT_BRANCH=master; fi
+    git reset --hard origin/$DEFAULT_BRANCH
+  else
+    echo -e "${RED}Existing repo remote doesn't match. Backing up and re-cloning...${NC}"
+    BACKUP_DIR="${APP_DIR}_backup_$(date +%Y%m%d%H%M%S)"
+    cd /
+    mv "$APP_DIR" "$BACKUP_DIR"
+    mkdir -p "$APP_DIR" && cd "$APP_DIR"
+    git clone "$EXPECTED_REMOTE" .
+  fi
+else
+  if [ -z "$(ls -A "$APP_DIR" 2>/dev/null)" ]; then
+    echo -e "${GREEN}Cloning fresh repository...${NC}"
+    git clone "$EXPECTED_REMOTE" .
+  else
+    echo -e "${YELLOW}Directory exists and is not empty. Backing up and re-cloning...${NC}"
+    BACKUP_DIR="${APP_DIR}_backup_$(date +%Y%m%d%H%M%S)"
+    cd /
+    mv "$APP_DIR" "$BACKUP_DIR"
+    mkdir -p "$APP_DIR" && cd "$APP_DIR"
+    git clone "$EXPECTED_REMOTE" .
+  fi
+fi
 
 # Setup PostgreSQL database
 echo -e "${GREEN}🗃️ Setting up PostgreSQL database...${NC}"
@@ -317,12 +345,29 @@ chmod -R 755 $APP_DIR
 echo -e "${GREEN}📝 Creating update script...${NC}"
 cat > /usr/local/bin/update-mario <<EOF
 #!/bin/bash
+set -e
 cd $APP_DIR
-git pull origin main
+EXPECTED_REMOTE="https://github.com/$GITHUB_USERNAME/$REPO_NAME.git"
+if [ -d .git ]; then
+  CURRENT_REMOTE=$(git remote get-url origin 2>/dev/null || echo "")
+  if [ "$CURRENT_REMOTE" != "$EXPECTED_REMOTE" ]; then
+    echo "Current remote differs. Aborting update. Expected: $EXPECTED_REMOTE, Found: $CURRENT_REMOTE"
+    exit 1
+  fi
+  git fetch --all --prune
+  DEFAULT_BRANCH=$(git symbolic-ref --short -q refs/remotes/origin/HEAD | sed 's|origin/||')
+  if [ -z "$DEFAULT_BRANCH" ]; then
+    if git rev-parse --verify origin/main >/dev/null 2>&1; then DEFAULT_BRANCH=main; else DEFAULT_BRANCH=master; fi
+  fi
+  git reset --hard "origin/$DEFAULT_BRANCH"
+else
+  echo "No git repository found in $APP_DIR. Aborting update."
+  exit 1
+fi
 cd backend && npm install
 cd .. && npm install && npm run build
 pm2 restart mario-backend
-echo "Mario marketplace updated successfully!"
+echo "✅ Mario marketplace updated successfully!"
 EOF
 chmod +x /usr/local/bin/update-mario
 
