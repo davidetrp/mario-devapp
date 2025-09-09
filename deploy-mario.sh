@@ -210,7 +210,7 @@ EOF
 # Create logs directory
 mkdir -p $APP_DIR/logs
 
-# Setup Nginx configuration
+# Setup Nginx configuration (Fixed cache headers)
 echo -e "${GREEN}🌐 Configuring Nginx...${NC}"
 cat > /etc/nginx/sites-available/$DOMAIN <<EOF
 server {
@@ -225,7 +225,7 @@ server {
     gzip on;
     gzip_vary on;
     gzip_min_length 1024;
-    gzip_proxied expired no-cache no-store private must-revalidate auth;
+    gzip_proxied expired no-cache no-store private auth;
     gzip_types text/plain text/css text/xml text/javascript application/javascript application/xml+rss application/json;
 
     # Security headers
