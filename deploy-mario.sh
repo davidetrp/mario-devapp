@@ -13,9 +13,9 @@ YELLOW='\033[1;33m'
 NC='\033[0m' # No Color
 
 # Configuration
-DOMAIN=${1:-"mario-marketplace.com"}
-GITHUB_USERNAME=${2:-"your-github-username"}
-REPO_NAME="mario-marketplace"
+DOMAIN=${1:-"mario-online.shop"}
+GITHUB_USERNAME=${2:-"davidetrp"}
+REPO_NAME="mario-devapp"
 APP_DIR="/var/www/mario"
 DB_NAME="mario_db"
 DB_USER="mario_user"
@@ -327,7 +327,7 @@ EOF
 chmod +x /usr/local/bin/update-mario
 
 # Final setup information
-echo -e "${GREEN}✅ Mario Marketplace deployment completed!${NC}"
+echo -e "${GREEN}✅ Mario deployment completed!${NC}"
 echo ""
 echo -e "${YELLOW}🌟 Deployment Summary:${NC}"
 echo -e "Domain: https://$DOMAIN"
@@ -352,7 +352,7 @@ echo -e "${YELLOW}🔒 Test Credentials:${NC}"
 echo -e "Email: marco.orefice@artigiani.it"
 echo -e "Password: password123"
 echo ""
-echo -e "${GREEN}🎉 Your Mario Marketplace is now live at: https://$DOMAIN${NC}"
+echo -e "${GREEN}🎉 Your Mario is now live at: https://$DOMAIN${NC}"
 
 # Save credentials to file
 cat > $APP_DIR/deployment-info.txt <<EOF
