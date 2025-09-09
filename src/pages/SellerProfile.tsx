@@ -3,7 +3,6 @@ import { useState, useEffect } from 'react';
 import { ArrowLeft, Star, MapPin, Phone, Globe, Clock, User, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { ServiceCard } from '@/components/home/ServiceCard';
 import { apiService } from '@/services/api';
@@ -43,8 +42,19 @@ const SellerProfile = () => {
         setLoading(true);
         const response = await apiService.getSeller(username);
         
-        if (response.success) {
-          setSeller(response.data);
+        if (response.success && response.data) {
+          const data = response.data as any;
+          const normalizedServices = (data?.services || []).map((svc: any) => ({
+            ...svc,
+            seller: {
+              username: data.username,
+              avatar: data.avatar,
+              rating: typeof svc.rating === 'number' ? svc.rating : (data?.stats?.avg_rating ?? 0),
+            },
+            reviews: typeof svc.reviews === 'number' ? svc.reviews : (svc.reviews_count ?? 0),
+          }));
+
+          setSeller({ ...data, services: normalizedServices });
         } else {
           setError('Artigiano non trovato');
         }
