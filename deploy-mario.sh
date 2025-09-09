@@ -211,7 +211,7 @@ npm run build
 
 # Setup PM2 ecosystem
 echo -e "${GREEN}⚡ Setting up PM2 configuration...${NC}"
-cat > ecosystem.config.js <<EOF
+cat > ecosystem.config.cjs <<EOF
 module.exports = {
   apps: [
     {
@@ -302,7 +302,7 @@ systemctl reload nginx
 # Start backend with PM2
 echo -e "${GREEN}🚀 Starting backend with PM2...${NC}"
 cd $APP_DIR
-pm2 start ecosystem.config.js
+pm2 start ecosystem.config.cjs
 pm2 save
 pm2 startup
 
