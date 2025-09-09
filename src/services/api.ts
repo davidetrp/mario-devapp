@@ -86,6 +86,10 @@ class ApiService {
     return this.request<any>(`/services/${id}`);
   }
 
+  async getSeller(username: string) {
+    return this.request<any>(`/services/seller/${username}`);
+  }
+
   async createService(serviceData: any) {
     return this.request<any>('/services', {
       method: 'POST',

@@ -41,11 +41,10 @@ const SellerProfile = () => {
       
       try {
         setLoading(true);
-        const response = await fetch(`http://localhost:3001/api/services/seller/${username}`);
-        const data = await response.json();
+        const response = await apiService.getSeller(username);
         
-        if (data.success) {
-          setSeller(data.data);
+        if (response.success) {
+          setSeller(response.data);
         } else {
           setError('Artigiano non trovato');
         }
