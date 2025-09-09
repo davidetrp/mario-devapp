@@ -1,8 +1,7 @@
 #!/bin/bash
 
-# Mario Marketplace Production Deployment Script
-# For Ubuntu 22.04 EC2 instances
-# Run as: sudo ./deploy-mario.sh your-domain.com your-github-username
+# Mario Marketplace Deployment Script
+# Usage: sudo ./deploy-mario.sh your-domain.com your-github-username repo-name
 
 set -e
 
@@ -10,12 +9,13 @@ set -e
 RED='\033[0;31m'
 GREEN='\033[0;32m'
 YELLOW='\033[1;33m'
+BLUE='\033[0;34m'
 NC='\033[0m' # No Color
 
 # Configuration
-DOMAIN=${1:-"mario-online.shop"}
-GITHUB_USERNAME=${2:-"davidetrp"}
-REPO_NAME="mario-devapp"
+DOMAIN=${1:-"your-domain.com"}
+GITHUB_USERNAME=${2:-"your-github-username"}
+REPO_NAME=${3:-"mario-marketplace"}
 APP_DIR="/var/www/mario"
 DB_NAME="mario_db"
 DB_USER="mario_user"
